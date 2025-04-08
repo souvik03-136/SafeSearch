@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Secure Crime Search</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      /* Light theme */
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --subtext: #64748b;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --input-bg: #f1f5f9;
+      --input-border: #cbd5e1;
+      --btn-shadow: rgba(99, 102, 241, 0.25);
+      --card-shadow: rgba(0, 0, 0, 0.06);
+      --highlight: rgba(99, 102, 241, 0.1);
+      --error: #ef4444;
+      --success: #10b981;
+    }
+    
+    [data-theme="dark"] {
+      /* Dark theme */
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f1f5f9;
+      --subtext: #94a3b8;
+      --accent: #818cf8;
+      --accent-hover: #6366f1;
+      --input-bg: #334155;
+      --input-border: #475569;
+      --btn-shadow: rgba(129, 140, 248, 0.3);
+      --card-shadow: rgba(0, 0, 0, 0.25);
+      --highlight: rgba(129, 140, 248, 0.15);
+      --error: #f87171;
+      --success: #34d399;
+    }
+    
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      transition: background var(--transition), color var(--transition);
+      line-height: 1.5;
+    }
+    
+    .container {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      max-width: 650px;
+      box-shadow: 0 10px 30px var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+      transition: all var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    
+    h1 {
+      font-weight: 700;
+      font-size: 1.8rem;
+      background: linear-gradient(to right, var(--accent), var(--accent-hover));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+    
+    .theme-switch {
+      display: flex;
+      align-items: center;
+    }
+    
+    .theme-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: relative;
+      width: 56px;
+      height: 28px;
+      background: var(--input-bg);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all var(--transition);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid var(--input-border);
+    }
+    
+    .slider::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      background: var(--accent);
+      border-radius: 50%;
+      transition: transform var(--transition), background var(--transition);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .slider::after {
+      content: '🌙';
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      font-size: 12px;
+      transition: opacity var(--transition);
+      opacity: 1;
+    }
+    
+    input:checked + .slider {
+      background: rgba(129, 140, 248, 0.2);
+    }
+    
+    input:checked + .slider::before {
+      transform: translateX(28px);
+      background: var(--accent);
+    }
+    
+    input:checked + .slider::after {
+      content: '☀️';
+      opacity: 1;
+      left: 10px;
+      right: auto;
+    }
+    
+    .search-container {
+      position: relative;
+      margin-bottom: 36px;
+    }
+    
+    form {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+    }
+    
+    .input-wrapper {
+      position: relative;
+      flex: 1;
+    }
+    
+    .input-wrapper i {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--subtext);
+      pointer-events: none;
+    }
+    
+    input[type="text"] {
+      width: 100%;
+      padding: 16px 20px 16px 50px;
+      border-radius: 16px;
+      border: 1px solid var(--input-border);
+      background: var(--input-bg);
+      font-size: 1rem;
+      color: var(--text);
+      outline: none;
+      transition: all var(--transition);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    input[type="text"]::placeholder {
+      color: var(--subtext);
+    }
+    
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      background: var(--card-bg);
+      box-shadow: 0 0 0 3px var(--highlight);
+    }
+    
+    button[type="submit"] {
+      padding: 16px 28px;
+      border: none;
+      border-radius: 16px;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all var(--transition);
+      box-shadow: 0 4px 12px var(--btn-shadow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    button[type="submit"]:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px var(--btn-shadow);
+    }
+    
+    button[type="submit"]:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px var(--btn-shadow);
+    }
+    
+    .results {
+      transition: opacity var(--transition);
+    }
+    
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    
+    .results h3 {
+      color: var(--text);
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    .result-count {
+      background: var(--highlight);
+      color: var(--accent);
+      padding: 6px 12px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    .results ul {
+      list-style: none;
+      display: grid;
+      gap: 12px;
+    }
+    
+    .results li {
+      background: var(--input-bg);
+      padding: 16px 20px;
+      border-radius: 16px;
+      border-left: 4px solid var(--accent);
+      color: var(--text);
+      transition: all var(--transition);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px var(--card-shadow);
+    }
+    
+    .results li:hover {
+      background: var(--card-bg);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--card-shadow);
+    }
+    
+    .case-id {
+      font-weight: 500;
+      color: var(--accent);
+    }
+    
+    .crime-type {
+      font-weight: 500;
+    }
+    
+    .status {
+      padding: 4px 10px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--highlight);
+      color: var(--accent);
+    }
+    
+    .status.resolved {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+    
+    .status.pending {
+      background: rgba(234, 179, 8, 0.1);
+      color: #eab308;
+    }
+    
+    .no-results {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--subtext);
+    }
+    
+    .no-results i {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--subtext);
+      padding-top: 20px;
+      border-top: 1px solid var(--input-border);
+    }
+    
+    @media (max-width: 640px) {
+      .container {
+        padding: 30px 24px;
+        border-radius: 20px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      form {
+        flex-direction: column;
+      }
+      
+      button[type="submit"] {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+  </style>
+</head>
+<body>
+  <div class="container animate-in">
+    <div class="header">
+      <h1>Secure Crime Database</h1>
+      <label class="theme-switch">
+        <input type="checkbox" id="theme-toggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div class="search-container">
+      <form method="POST">
+        <div class="input-wrapper">
+          <i class="fas fa-search"></i>
+          <input type="text" name="query" placeholder="Enter crime type, location, or keyword" required>
+        </div>
+        <button type="submit">
+          <i class="fas fa-filter"></i>
+          Search
+        </button>
+      </form>
+    </div>
+    
+    <div class="results">
+      <!-- Example results -->
+      <div class="results-header">
+        <h3>Search Results</h3>
+        <span class="result-count">4 matches</span>
+      </div>
+      <ul>
+        <li>
+          <div>
+            <span class="case-id">#CR-2378</span>
+            <div class="crime-type">Aggravated Robbery</div>
+          </div>
+          <span class="status">Active</span>
+        </li>
+        <li>
+          <div>
+            <span class="case-id">#CR-2142</span>
+            <div class="crime-type">Armed Robbery</div>
+          </div>
+          <span class="status resolved">Resolved</span>
+        </li>
+        <li>
+          <div>
+            <span class="case-id">#CR-1876</span>
+            <div class="crime-type">Bank Robbery</div>
+          </div>
+          <span class="status pending">Pending</span>
+        </li>
+        <li>
+          <div>
+            <span class="case-id">#CR-2021</span>
+            <div class="crime-type">Store Robbery</div>
+          </div>
+          <span class="status">Active</span>
+        </li>
+      </ul>
+      
+      <!-- No results state (uncomment to show)
+      <div class="no-results">
+        <i class="fas fa-search"></i>
+        <p>No matching records found</p>
+        <p>Try different keywords or filters</p>
+      </div>
+      -->
+    </div>
+    
+    <div class="footer">
+      Secure Crime Database • Last updated April 2025
+    </div>
+  </div>
+
+  <script>
+    const toggle = document.getElementById('theme-toggle');
+    const root = document.documentElement;
+    
+    // Initialize theme
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (saved === 'dark' || (!saved && prefersDark)) {
+      root.setAttribute('data-theme', 'dark');
+      toggle.checked = true;
+    }
+    
+    // On change
+    toggle.addEventListener('change', () => {
+      if (toggle.checked) {
+        root.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        root.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+    
+    // For demo purposes: Simulate dynamic content
+    document.addEventListener('DOMContentLoaded', function() {
+      // Placeholder for server-rendered content
+      const form = document.querySelector('form');
+      form.addEventListener('submit', function(e) {
+        // In a real app, this would be handled by the server
+        e.preventDefault();
+        const query = document.querySelector('input[name="query"]').value.toLowerCase();
+        
+        // Show a loading state
+        document.querySelector('.results').style.opacity = '0.5';
+        
+        // Simulate API call
+        setTimeout(() => {
+          document.querySelector('.results').style.opacity = '1';
+          // Additional functionality would be here
+        }, 500);
+      });
+    });
+  </script>
+</body>
+</html>

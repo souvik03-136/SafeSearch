@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+    environment:
+      - DB_HOST=db
+      - ZKP_HOST=zkp
+      - BLOCKCHAIN_HOST=blockchain
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: searchdb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data/crimes.csv:/data/crimes.csv
+    ports:
+      - "5432:5432"
+
+  blockchain:
+    build: ./blockchain
+    working_dir: /app
+    command: ["node", "log_search.js"]
+    ports:
+      - "3000:3000"
+
+  zkp:
+    build: ./zkp
+    command: ["python", "verifier.py"]
+    ports:
+      - "4000:4000"
+
+  client:
+    build: ./client
+    ports:
+      - "5000:5000"
