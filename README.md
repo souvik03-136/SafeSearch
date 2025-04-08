@@ -28,8 +28,8 @@ A privacy-preserving crime record search system using Homomorphic Encryption and
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/your-repo/secure-crime-search.git
-cd secure-crime-search
+git clone https://github.com/souvik03-136/SafeSearch.git
+cd SafeSearch
 ```
 
 ### 2. Create Environment Files
